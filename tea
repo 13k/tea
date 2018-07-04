@@ -13,7 +13,7 @@ YAML_EXT = 'yml'
 TMUXP_DEFAULT_BIN = Path('tmuxp')
 TMUXP_DEFAULT_CONFIG_DIR = Path.home().joinpath('.tmuxp')
 
-TMUXP_BASE_SESSION_CONFIG = {
+TMUXP_CONFIG_TEMPLATE = {
     'session_name':
     'session_name',
     'windows': [
@@ -78,9 +78,21 @@ def main():
         '--generate',
         action='store_true',
         default=False,
-        help=
-        '''Generate a tmuxp session configuration for a project (default: %(default)s)'''
-    )
+        help='''Generate a tmuxp session configuration for a project''')
+
+    parser.add_argument(
+        '-l',
+        '--list',
+        action='store_true',
+        default=False,
+        help='''List project configurations''')
+
+    parser.add_argument(
+        '-D',
+        '--print-dir',
+        action='store_true',
+        default=False,
+        help='''Print the starting directory of a project''')
 
     parser.add_argument(
         '-d',
@@ -98,40 +110,67 @@ def main():
     )
 
     parser.add_argument(
-        'name', metavar='NAME', help='''Act on project/session NAME''')
+        'name',
+        metavar='NAME',
+        nargs='?',
+        help='''Act on project/session NAME''')
 
-    args = parser.parse_args()
+    options = parser.parse_args()
 
-    if args.generate:
-        return generate(args)
+    if options.list:
+        return list_configs(options)
 
-    return load(args)
+    if options.name is None:
+        parser.error('NAME is required')
+
+    if options.print_dir:
+        return print_dir(options)
+
+    if options.generate:
+        return generate_config(options)
+
+    return load_session(options)
 
 
-def load(args):
-    os.execlp(args.tmuxp, 'tmuxp', 'load', args.name)
+def parse_config(name, config_dir):
+    with config_dir.joinpath(f'{name}.{YAML_EXT}').open('r') as f:
+        return yaml.load(f)
 
 
-def generate(args):
-    output_name = f'{args.name}.{YAML_EXT}'
-    output_path = args.config_dir.joinpath(output_name)
+def list_configs(options):
+    for p in sorted(options.config_dir.glob(f'*.{YAML_EXT}')):
+        print(p.name[:p.name.rfind(p.suffix)])
 
-    if output_path.exists() and not args.force:
+
+def print_dir(options):
+    config = parse_config(options.name, options.config_dir)
+    print(config['windows'][0]['start_directory'])
+
+
+def generate_config(options):
+    output_name = f'{options.name}.{YAML_EXT}'
+    output_path = options.config_dir.joinpath(output_name)
+
+    if output_path.exists() and not options.force:
         print(
-            f'Session configuration {args.name} [{output_path}] already exists'
+            f'Session configuration {options.name} [{output_path}] already exists'
         )
         return 1
 
-    config = copy.deepcopy(TMUXP_BASE_SESSION_CONFIG)
-    config['session_name'] = args.name
+    config = copy.deepcopy(TMUXP_CONFIG_TEMPLATE)
+    config['session_name'] = options.name
     config['windows'][0].update(
-        window_name=args.name, start_directory=str(args.directory))
+        window_name=options.name, start_directory=str(options.directory))
 
     with output_path.open('w') as f:
         yaml.dump(config, f, default_flow_style=False)
 
     print(f'Saved session configuration to {output_path}')
     return 0
+
+
+def load_session(options, *args):
+    os.execlp(options.tmuxp, 'tmuxp', 'load', '-y', *args, options.name)
 
 
 if __name__ == '__main__':
