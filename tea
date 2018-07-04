@@ -10,9 +10,10 @@ import yaml
 
 YAML_EXT = 'yml'
 
+TMUX_DEFAULT_BIN = Path('tmux')
+
 TMUXP_DEFAULT_BIN = Path('tmuxp')
 TMUXP_DEFAULT_CONFIG_DIR = Path.home().joinpath('.tmuxp')
-
 TMUXP_CONFIG_TEMPLATE = {
     'session_name':
     'session_name',
@@ -65,6 +66,13 @@ def main():
 
     parser.add_argument(
         '-t',
+        '--tmux',
+        type=patharg,
+        default=TMUX_DEFAULT_BIN,
+        help='''tmux executable path (default: %(default)s)''')
+
+    parser.add_argument(
+        '-T',
         '--tmuxp',
         type=patharg,
         default=TMUXP_DEFAULT_BIN,
@@ -89,7 +97,14 @@ def main():
         '--list',
         action='store_true',
         default=False,
-        help='''List project configurations''')
+        help='''List available configurations''')
+
+    parser.add_argument(
+        '-a',
+        '--active',
+        action='store_true',
+        default=False,
+        help='''List active sessions''')
 
     parser.add_argument(
         '-D',
@@ -122,18 +137,29 @@ def main():
     options = parser.parse_args()
 
     if options.list:
-        return list_configs(options)
+        return cmd_list_configs(options)
+
+    if options.active:
+        return cmd_list_active(options)
 
     if options.name is None:
         parser.error('NAME is required')
 
     if options.print_dir:
-        return print_dir(options)
+        return cmd_print_dir(options)
 
     if options.generate:
-        return generate_config(options)
+        return cmd_generate_config(options)
 
-    return load_session(options)
+    return cmd_load_session(options)
+
+
+def load_session(options, *args):
+    os.execlp(options.tmuxp, 'tmuxp', 'load', '-y', *args, options.name)
+
+
+def list_sessions(options):
+    os.execlp(options.tmux, 'tmux', 'ls')
 
 
 def parse_config(name, config_dir):
@@ -141,12 +167,16 @@ def parse_config(name, config_dir):
         return yaml.load(f)
 
 
-def list_configs(options):
+def cmd_list_configs(options):
     for p in sorted(options.config_dir.glob(f'*.{YAML_EXT}')):
         print(p.name[:p.name.rfind(p.suffix)])
 
 
-def print_dir(options):
+def cmd_list_active(options):
+    return list_sessions(options)
+
+
+def cmd_print_dir(options):
     try:
         config = parse_config(options.name, options.config_dir)
         print(config['windows'][0]['start_directory'])
@@ -155,7 +185,7 @@ def print_dir(options):
         return 1
 
 
-def generate_config(options):
+def cmd_generate_config(options):
     output_name = f'{options.name}.{YAML_EXT}'
     output_path = options.config_dir.joinpath(output_name)
 
@@ -175,8 +205,8 @@ def generate_config(options):
     return 0
 
 
-def load_session(options, *args):
-    os.execlp(options.tmuxp, 'tmuxp', 'load', '-y', *args, options.name)
+def cmd_load_session(options):
+    return load_session(options)
 
 
 if __name__ == '__main__':
