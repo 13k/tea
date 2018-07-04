@@ -55,6 +55,10 @@ def patharg(must_exist=False, expand=False, return_raw=False):
     return validate_patharg
 
 
+def err(*args, **kwargs):
+    print(*args, **kwargs, file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='''Control tmux (with tmuxp)''')
@@ -143,8 +147,12 @@ def list_configs(options):
 
 
 def print_dir(options):
-    config = parse_config(options.name, options.config_dir)
-    print(config['windows'][0]['start_directory'])
+    try:
+        config = parse_config(options.name, options.config_dir)
+        print(config['windows'][0]['start_directory'])
+    except FileNotFoundError:
+        err(f'Session configuration {options.name} does not exist')
+        return 1
 
 
 def generate_config(options):
@@ -152,9 +160,7 @@ def generate_config(options):
     output_path = options.config_dir.joinpath(output_name)
 
     if output_path.exists() and not options.force:
-        print(
-            f'Session configuration {options.name} [{output_path}] already exists'
-        )
+        print(f'Session configuration {options.name} [{output_path}] already exists')
         return 1
 
     config = copy.deepcopy(TMUXP_CONFIG_TEMPLATE)
