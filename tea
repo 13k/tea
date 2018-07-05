@@ -84,6 +84,13 @@ def main():
         help='''tmuxp config path (default: %(default)s)''')
 
     parser.add_argument(
+        '-K',
+        '--kill',
+        action='store_true',
+        default=False,
+        help='''Kill the tmux server''')
+
+    parser.add_argument(
         '-g',
         '--generate',
         action='store_true',
@@ -134,6 +141,9 @@ def main():
 
     options = parser.parse_args()
 
+    if options.kill:
+        return cmd_kill_server(options)
+
     if options.list:
         return cmd_list_configs(options)
 
@@ -152,17 +162,21 @@ def main():
     return cmd_load_session(options)
 
 
-def load_session(options, *args):
-    os.execlp(options.tmuxp, 'tmuxp', 'load', '-y', *args, options.name)
+def tmux(cmd, *args, **kwargs):
+    os.execlp(cmd, 'tmux', *args, **kwargs)
 
 
-def list_sessions(options):
-    os.execlp(options.tmux, 'tmux', 'ls')
+def tmuxp(cmd, *args, **kwargs):
+    os.execlp(cmd, 'tmuxp', *args, **kwargs)
 
 
 def parse_config(name, config_dir):
     with config_dir.joinpath(f'{name}.{YAML_EXT}').open('r') as f:
         return yaml.load(f)
+
+
+def cmd_kill_server(options):
+    tmux(options.tmux, 'kill-server')
 
 
 def cmd_list_configs(options):
@@ -171,7 +185,7 @@ def cmd_list_configs(options):
 
 
 def cmd_list_active(options):
-    return list_sessions(options)
+    return tmux(options.tmux, 'ls')
 
 
 def cmd_print_dir(options):
@@ -204,7 +218,7 @@ def cmd_generate_config(options):
 
 
 def cmd_load_session(options):
-    return load_session(options)
+    return tmuxp(options.tmuxp, 'load', '-y', options.name)
 
 
 if __name__ == '__main__':
