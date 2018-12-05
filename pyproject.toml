@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "tea"
+version = "0.1.0"
+description = ""
+authors = ["Kiyoshi '13k' Murata <kbmurata@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+PyYAML = "^3.13"
+
+[tool.poetry.dev-dependencies]
+pylint = "^2.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
