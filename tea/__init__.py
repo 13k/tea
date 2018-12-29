@@ -11,7 +11,10 @@ YAML_EXT = "yml"
 TMUX_DEFAULT_BIN = Path("tmux")
 
 TMUXP_DEFAULT_BIN = Path("tmuxp")
-TMUXP_DEFAULT_CONFIG_DIR = Path.home().joinpath(".tmuxp")
+TMUXP_CONFIGDIR_ENV = "TMUXP_CONFIGDIR"
+TMUXP_DEFAULT_CONFIG_DIR = Path(
+    os.getenv(TMUXP_CONFIGDIR_ENV, Path.home().joinpath(".tmuxp"))
+)
 TMUXP_CONFIG_TEMPLATE = {
     "session_name": "session_name",
     "windows": [
