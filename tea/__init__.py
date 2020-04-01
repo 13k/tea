@@ -10,6 +10,8 @@ from pathlib import Path
 
 import yaml
 
+__version__ = "0.1.0"
+
 YAML_EXT = "yml"
 
 TMUX_DEFAULT_BIN = Path("tmux")
@@ -152,10 +154,17 @@ def main():
     )
 
     parser.add_argument(
+        "-V", "--version", action="store_true", default=False, help="""Show version""",
+    )
+
+    parser.add_argument(
         "name", metavar="NAME", nargs="?", help="""Act on project/session NAME"""
     )
 
     options = parser.parse_args()
+
+    if options.version:
+        return cmd_version(options)
 
     if options.kill:
         return cmd_kill_server(options)
@@ -191,6 +200,12 @@ def tmuxp(cmd, *args, **kwargs):
 def _parse_config(name, config_dir):
     with config_dir.joinpath(f"{name}.{YAML_EXT}").open("r") as cfg_file:
         return yaml.load(cfg_file)
+
+
+def cmd_version(_options):
+    """ Prints tea version """
+    print(__version__)
+    return 0
 
 
 def cmd_kill_server(options):
