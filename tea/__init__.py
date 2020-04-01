@@ -16,7 +16,7 @@ TMUX_DEFAULT_BIN = Path("tmux")
 
 TMUXP_DEFAULT_BIN = Path("tmuxp")
 TMUXP_DEFAULT_CONFIG_DIR = Path.home().joinpath(".tmuxp")
-TMUXP_CONFIGDIR_ENV = "TMUXP_CONFIGDIR"
+TMUXP_CONFIG_DIR_ENV_VAR = "TMUXP_CONFIG_DIR"
 
 TMUXP_CONFIG_TEMPLATE = {
     "session_name": "session_name",
@@ -34,7 +34,7 @@ TMUXP_CONFIG_TEMPLATE = {
 
 
 def _tmuxp_config_dir():
-    config_dir = os.getenv(TMUXP_CONFIGDIR_ENV, "")
+    config_dir = os.getenv(TMUXP_CONFIG_DIR_ENV_VAR, "")
 
     if config_dir == "":
         config_dir = TMUXP_DEFAULT_CONFIG_DIR
