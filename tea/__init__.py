@@ -1,3 +1,7 @@
+"""
+tea is a thin tmuxp wrapper.
+"""
+
 import argparse
 import copy
 import os
@@ -11,10 +15,9 @@ YAML_EXT = "yml"
 TMUX_DEFAULT_BIN = Path("tmux")
 
 TMUXP_DEFAULT_BIN = Path("tmuxp")
+TMUXP_DEFAULT_CONFIG_DIR = Path.home().joinpath(".tmuxp")
 TMUXP_CONFIGDIR_ENV = "TMUXP_CONFIGDIR"
-TMUXP_DEFAULT_CONFIG_DIR = Path(
-    os.getenv(TMUXP_CONFIGDIR_ENV, Path.home().joinpath(".tmuxp"))
-)
+
 TMUXP_CONFIG_TEMPLATE = {
     "session_name": "session_name",
     "windows": [
@@ -30,7 +33,18 @@ TMUXP_CONFIG_TEMPLATE = {
 }
 
 
+def _tmuxp_config_dir():
+    config_dir = os.getenv(TMUXP_CONFIGDIR_ENV, "")
+
+    if config_dir == "":
+        config_dir = TMUXP_DEFAULT_CONFIG_DIR
+
+    return Path(config_dir)
+
+
 def patharg(must_exist=False, expand=False, return_raw=False):
+    """ Creates a Path argument parser """
+
     def validate_patharg(arg):
         raw = Path(arg)
 
@@ -40,8 +54,8 @@ def patharg(must_exist=False, expand=False, return_raw=False):
             path = raw
 
         if must_exist and not path.exists():
-            err = f"Path {path} doesn't exist"
-            raise argparse.ArgumentTypeError(err)
+            msg = f"Path {path} doesn't exist"
+            raise argparse.ArgumentTypeError(msg)
 
         return raw if return_raw else path
 
@@ -49,10 +63,12 @@ def patharg(must_exist=False, expand=False, return_raw=False):
 
 
 def err(*args, **kwargs):
+    """ Prints a message to stderr """
     print(*args, **kwargs, file=sys.stderr)
 
 
 def main():
+    """ CLI entry-point """
     parser = argparse.ArgumentParser(description="""Control tmux (with tmuxp)""")
 
     parser.add_argument(
@@ -75,7 +91,7 @@ def main():
         "-c",
         "--config-dir",
         type=patharg(must_exist=True),
-        default=TMUXP_DEFAULT_CONFIG_DIR,
+        default=_tmuxp_config_dir(),
         help="""tmuxp config path (default: %(default)s)""",
     )
 
@@ -163,41 +179,52 @@ def main():
 
 
 def tmux(cmd, *args, **kwargs):
+    """ Runs tmux command """
     os.execlp(cmd, "tmux", *args, **kwargs)
 
 
 def tmuxp(cmd, *args, **kwargs):
+    """ Runs tmuxp command """
     os.execlp(cmd, "tmuxp", *args, **kwargs)
 
 
-def parse_config(name, config_dir):
-    with config_dir.joinpath(f"{name}.{YAML_EXT}").open("r") as f:
-        return yaml.load(f)
+def _parse_config(name, config_dir):
+    with config_dir.joinpath(f"{name}.{YAML_EXT}").open("r") as cfg_file:
+        return yaml.load(cfg_file)
 
 
 def cmd_kill_server(options):
-    tmux(options.tmux, "kill-server")
+    """ Kills tmux server """
+    return tmux(options.tmux, "kill-server")
 
 
 def cmd_list_configs(options):
-    for p in sorted(options.config_dir.glob(f"*.{YAML_EXT}")):
-        print(p.name[: p.name.rfind(p.suffix)])
+    """ Lists available tmuxp configs """
+    for path in sorted(options.config_dir.glob(f"*.{YAML_EXT}")):
+        print(path.name[: path.name.rfind(path.suffix)])
+
+    return 0
 
 
 def cmd_list_active(options):
+    """ Lists active tmux sessions """
     return tmux(options.tmux, "ls")
 
 
 def cmd_print_dir(options):
+    """ Prints the starting directory of a tmuxp config (if defined) """
     try:
-        config = parse_config(options.name, options.config_dir)
+        config = _parse_config(options.name, options.config_dir)
         print(config["windows"][0]["start_directory"])
     except FileNotFoundError:
         err(f"Session configuration {options.name} does not exist")
         return 1
 
+    return 0
+
 
 def cmd_generate_config(options):
+    """ Generates a tmuxp session config """
     output_name = f"{options.name}.{YAML_EXT}"
     output_path = options.config_dir.joinpath(output_name)
 
@@ -211,12 +238,14 @@ def cmd_generate_config(options):
         window_name=options.name, start_directory=str(options.directory)
     )
 
-    with output_path.open("w") as f:
-        yaml.dump(config, f, default_flow_style=False)
+    with output_path.open("w") as cfg_file:
+        yaml.dump(config, cfg_file, default_flow_style=False)
 
     print(f"Saved session configuration to {output_path}")
+
     return 0
 
 
 def cmd_load_session(options):
+    """ Loads a tmuxp session """
     return tmuxp(options.tmuxp, "load", "-y", options.name)
