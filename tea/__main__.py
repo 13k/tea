@@ -1,3 +1,7 @@
+"""
+main module.
+"""
+
 import sys
 
 from tea import main
