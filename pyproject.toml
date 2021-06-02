@@ -1,20 +1,24 @@
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
 [tool.poetry]
 name = "tea"
 version = "0.2.0"
 description = ""
 authors = ["Kiyoshi '13k' Murata <kbmurata@gmail.com>"]
 
-[tool.poetry.dependencies]
-python = "^3.7"
-PyYAML = "^3.13"
-
-[tool.poetry.dev-dependencies]
-pylint = "^2.2"
-black = {version = "^19.10b0", allow-prereleases = true}
-
 [tool.poetry.scripts]
 tea = 'tea:main'
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+[tool.poetry.dependencies]
+python = "^3.9"
+PyYAML = "^3.13"
+tmuxp = "^1.7.2"
+
+[tool.poetry.dev-dependencies]
+pylint = "*"
+black = {version = "*", allow-prereleases = true}
+isort = "*"
+mypy = "*"
+ptpython = "*"
