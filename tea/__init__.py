@@ -16,7 +16,7 @@ from tmuxp import cli as tmuxp_cli
 
 PathLike = Union[str, os.PathLike[str]]
 
-__version__: Final[str] = "0.3.0"
+__version__: Final[str] = "0.4.0"
 
 YAML_EXT: Final[str] = "yml"
 TMUX_DEFAULT_BIN: Final[Path] = Path("tmux")
