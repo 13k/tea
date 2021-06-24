@@ -14,7 +14,7 @@ tea = 'tea:main'
 [tool.poetry.dependencies]
 python = "^3.9"
 PyYAML = "^5.4.1"
-tmuxp = "^1.7.2"
+tmuxp = "^1.9.2"
 
 [tool.poetry.dev-dependencies]
 black = "^21.5b2"
