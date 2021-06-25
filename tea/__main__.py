@@ -4,6 +4,6 @@ main module.
 
 import sys
 
-from tea import main
+from tea.cli import main
 
 sys.exit(main() or 0)

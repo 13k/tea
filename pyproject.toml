@@ -9,7 +9,7 @@ description = "Manage tmuxp session configurations"
 authors = ["Kiyoshi '13k' Murata <kbmurata@gmail.com>"]
 
 [tool.poetry.scripts]
-tea = 'tea:main'
+tea = 'tea.cli:main'
 
 [tool.poetry.dependencies]
 python = "^3.9"
