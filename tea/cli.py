@@ -13,10 +13,9 @@ from . import __version__
 from .path import PathLike, expand_path
 from .tmux import TMUX_DEFAULT_BIN
 from .tmux import run as tmux
-from .tmuxp import config_generate as tmuxp_config_generate
+from .tmuxp import config_create as tmuxp_config_create
 from .tmuxp import config_list as tmuxp_config_list
 from .tmuxp import config_start_dir as tmuxp_config_start_dir
-from .tmuxp import config_write as tmuxp_config_write
 from .tmuxp import load as tmuxp_load
 
 OptionTypeRt = TypeVar("OptionTypeRt")
@@ -65,7 +64,7 @@ def _patharg(
     return validate_patharg
 
 
-def main() -> int: # pylint: disable=too-many-return-statements
+def main() -> int:  # pylint: disable=too-many-return-statements
     """CLI entry-point"""
     parser = argparse.ArgumentParser(description="Control tmux (with tmuxp)")
 
@@ -232,10 +231,12 @@ def _cmd_print_dir(options: Options) -> int:
 
 
 def _cmd_generate_config(options: Options) -> int:
-    config = tmuxp_config_generate(options.name, options.directory)
-
     try:
-        config_path = tmuxp_config_write(config, force=options.force)
+        config_path = tmuxp_config_create(
+            name=options.name,
+            start_dir=options.directory,
+            force=options.force,
+        )
 
         print(f"{options.name}: session configuration saved in {config_path}")
 

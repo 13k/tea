@@ -14,20 +14,25 @@ from tmuxp import cli as tmuxp_cli
 from .config import Config
 from .path import PathLike, expand_path
 
-CONFIG_EXT: Final[str] = "yml"
-CONFIG_TEMPLATE: Final[Config] = {
-    "session_name": "session_name",
-    "start_directory": "$HOME",
-    "windows": [
-        {
-            "window_name": "window_name",
-            "focus": True,
-            "layout": "main-vertical",
-            "options": {},
-            "panes": [{"focus": True}, "blank", "blank"],
-        }
-    ],
-}
+CONFIG_EXT: Final = "yml"
+
+CONFIG_TEMPLATE: Final = """
+__base_window__: &base_window
+  layout: main-vertical
+  panes:
+    - focus: true
+    - blank
+    - blank
+
+session_name: "{session_name!s}"
+start_directory: "{start_directory!s}"
+windows:
+  - window_name: "{window_name!s}"
+    focus: true
+    <<: *base_window
+  - window_name: "{window_name!s}"
+    <<: *base_window
+"""
 
 
 def config_dir() -> Path:
@@ -88,22 +93,15 @@ def config_start_dir(name: str, expand: bool = False) -> str | None:
     return start_dir
 
 
-def config_generate(name: str, start_dir: PathLike) -> Config:
-    """Generates a skeleton tmuxp session configuration"""
-
-    config: Config = copy.deepcopy(CONFIG_TEMPLATE)
-
-    config["session_name"] = name
-    config["start_directory"] = str(start_dir)
-    config["windows"][0]["window_name"] = name
-
-    return config
-
-
-def config_write(config: Config, force: bool = False) -> Path | None:
+def config_create(name: str, start_dir: PathLike, force: bool = False) -> Path | None:
     """Writes a tmuxp session configuration and returns its path"""
 
-    name = config["session_name"]
+    content = CONFIG_TEMPLATE.format(
+        session_name=name,
+        start_directory=start_dir,
+        window_name=name,
+    )
+
     output_path = config_file(name)
     mode = "x"
 
@@ -111,7 +109,7 @@ def config_write(config: Config, force: bool = False) -> Path | None:
         mode = "w"
 
     with output_path.open(mode) as file:
-        yaml.dump(config, file, default_flow_style=False)
+        file.write(content)
 
     return output_path
 
