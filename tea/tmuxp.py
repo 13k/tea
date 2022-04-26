@@ -1,18 +1,18 @@
 """
 tmuxp integration
 """
-
 from __future__ import annotations
 
-import copy
 from pathlib import Path
 from typing import Final
 
 import yaml
-from tmuxp import cli as tmuxp_cli
+from tmuxp.cli.load import load_workspace
+from tmuxp.cli.utils import get_config_dir
 
 from .config import Config
-from .path import PathLike, expand_path
+from .path import expand_path
+from .path import PathLike
 
 CONFIG_EXT: Final = "yml"
 
@@ -38,7 +38,7 @@ windows:
 def config_dir() -> Path:
     """Returns path to tmuxp's configuration directory"""
 
-    return Path(tmuxp_cli.get_config_dir())
+    return Path(get_config_dir())
 
 
 def config_name(name: str) -> str:
@@ -119,4 +119,4 @@ def load(name: str) -> None:
 
     config_path = config_file(name)
 
-    tmuxp_cli.load_workspace(config_file=config_path, answer_yes=True)
+    load_workspace(config_file=config_path, answer_yes=True)
