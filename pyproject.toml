@@ -14,14 +14,14 @@ tea = 'tea.cli:main'
 [tool.poetry.dependencies]
 python = "^3.9"
 PyYAML = "^5.4.1"
-tmuxp = "^1.9.4"
+tmuxp = "^1.11.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1"
-isort = "^5.10"
 mypy = "^0.931"
 ptpython = "^3.0"
 pylint = "^2.12"
+reorder-python-imports = "^3.0.1"
 rope = "^0.23"
 types-PyYAML = "^5.4"
 
