@@ -8,7 +8,7 @@ from typing import Final
 
 import yaml
 from tmuxp.cli.load import load_workspace
-from tmuxp.cli.utils import get_config_dir
+from tmuxp.workspace.finders import get_workspace_dir
 
 from .config import Config
 from .path import expand_path
@@ -38,7 +38,7 @@ windows:
 def config_dir() -> Path:
     """Returns path to tmuxp's configuration directory"""
 
-    return Path(get_config_dir())
+    return Path(get_workspace_dir())
 
 
 def config_name(name: str) -> str:
