@@ -12,9 +12,9 @@ authors = ["Kiyoshi '13k' Murata <kbmurata@gmail.com>"]
 tea = 'tea.cli:main'
 
 [tool.poetry.dependencies]
-python = "^3.9"
-PyYAML = "^5.4.1"
-tmuxp = "^1.11.0"
+python = "^3.10"
+PyYAML = "^6.0"
+tmuxp = "^1.27.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1"
