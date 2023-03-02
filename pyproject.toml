@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "tea"
-version = "0.4.3"
+version = "0.4.4"
 description = "Manage tmuxp session configurations"
 authors = ["Kiyoshi '13k' Murata <kbmurata@gmail.com>"]
 
