@@ -20,7 +20,7 @@ tmuxp = "^1.27.0"
 black = "^23.1"
 mypy = "^1.0"
 ptpython = "^3.0"
-types-PyYAML = "^5.4"
+types-PyYAML = "^6.0"
 
 [tool.black]
 line-length = 98
