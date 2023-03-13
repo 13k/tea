@@ -119,4 +119,4 @@ def load(name: str) -> None:
 
     config_path = config_file(name)
 
-    load_workspace(config_file=config_path, answer_yes=True)
+    load_workspace(workspace_file=config_path, answer_yes=True)
