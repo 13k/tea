@@ -1,7 +1,9 @@
 /.envrc
+/.mypy_cache
 /.python-version
+/.venv
 /.vscode
 /dist
-.mypy_cache
+
 __pycache__
 *.egg-info
