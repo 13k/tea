@@ -11,59 +11,60 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, poetry2nix }:
-    let
-      projectDir = self;
-      project = nixpkgs.lib.importTOML "${projectDir}/pyproject.toml";
-      projectName = project.tool.poetry.name;
-      pythonVersion = "310";
-    in
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+    poetry2nix,
+  }: let
+    projectDir = self;
+    project = nixpkgs.lib.importTOML "${projectDir}/pyproject.toml";
+    projectName = project.tool.poetry.name;
+    pythonVersion = "311";
+  in
+    flake-utils.lib.eachDefaultSystem (system: let
+      pkgs = import nixpkgs {
+        inherit system;
 
-          overlays = [
-            poetry2nix.overlay
-          ];
+        overlays = [
+          poetry2nix.overlay
+        ];
+      };
+
+      inherit (pkgs.poetry2nix) mkPoetryApplication mkPoetryEnv;
+
+      python = pkgs."python${pythonVersion}";
+
+      overrides = pkgs.poetry2nix.overrides.withDefaults (self: super: {
+        mypy = super.mypy.overridePythonAttrs (old: {
+          enableParallelBuilding = true;
+        });
+
+        # workaround https://github.com/nix-community/poetry2nix/issues/568
+        tmuxp = super.tmuxp.overridePythonAttrs (old: {
+          buildInputs = (old.buildInputs or []) ++ [self.poetry-core];
+        });
+      });
+    in {
+      packages = {
+        ${projectName} = mkPoetryApplication {
+          inherit python projectDir overrides;
         };
 
-        python = pkgs."python${pythonVersion}";
-        pythonPackages = pkgs."python${pythonVersion}Packages";
+        default = self.packages.${system}.${projectName};
+      };
 
-        poetryOverrides = pkgs.poetry2nix.overrides.withDefaults (self: super: {
-          # workaround https://github.com/nix-community/poetry2nix/issues/568
-          tmuxp = super.tmuxp.overridePythonAttrs (old: {
-            buildInputs = (old.buildInputs or [ ]) ++ [ self.poetry-core ];
-          });
-        });
-      in
-      rec {
-        packages =
-          {
-            ${projectName} = pkgs.poetry2nix.mkPoetryApplication {
-              inherit projectDir python;
+      devShells = {
+        ${projectName} = mkPoetryEnv {
+          inherit python projectDir overrides;
+        };
 
-              overrides = poetryOverrides;
-            };
-
-            default = packages.${projectName};
-          };
-
-        devShells =
-          {
-            ${projectName} = pkgs.poetry2nix.mkPoetryEnv {
-              inherit projectDir python;
-
-              overrides = poetryOverrides;
-            };
-
-            default = pkgs.mkShell {
-              packages = [
-                pkgs.poetry
-                devShells.${projectName}
-              ];
-            };
-          };
-      });
+        default = pkgs.mkShell {
+          packages = [
+            pkgs.poetry
+            self.devShells.${system}.${projectName}
+          ];
+        };
+      };
+    });
 }
