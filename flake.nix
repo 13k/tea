@@ -36,10 +36,6 @@
       python = pkgs."python${pythonVersion}";
 
       overrides = pkgs.poetry2nix.overrides.withDefaults (self: super: {
-        mypy = super.mypy.overridePythonAttrs (old: {
-          enableParallelBuilding = true;
-        });
-
         # workaround https://github.com/nix-community/poetry2nix/issues/568
         tmuxp = super.tmuxp.overridePythonAttrs (old: {
           buildInputs = (old.buildInputs or []) ++ [self.poetry-core];
@@ -49,6 +45,8 @@
       packages = {
         ${projectName} = mkPoetryApplication {
           inherit python projectDir overrides;
+
+          preferWheels = true;
         };
 
         default = self.packages.${system}.${projectName};
@@ -57,6 +55,8 @@
       devShells = {
         ${projectName} = mkPoetryEnv {
           inherit python projectDir overrides;
+
+          preferWheels = true;
         };
 
         default = pkgs.mkShell {
