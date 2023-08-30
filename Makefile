@@ -9,7 +9,7 @@ build: ## Build package with poetry
 
 .PHONY: nix-build
 nix-build: ## Build nix flake
-	@nix build --no-link --allow-dirty --no-warn-dirty $(if $(DEBUG),"-L")
+	@nix build --no-link --allow-dirty --no-warn-dirty $(if $(DEBUG),-L --show-trace)
 	@nix path-info -Sh --allow-dirty --no-warn-dirty
 
 .PHONY: nix-check
