@@ -2,20 +2,14 @@
   description = "Manage tmuxp session configurations";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    poetry2nix = {
-      url = "github:nix-community/poetry2nix";
-      inputs.flake-utils.follows = "flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixpkgs.url = "github:NixOS/nixpkgs/23.05";
   };
 
   outputs = {
     self,
-    nixpkgs,
     flake-utils,
-    poetry2nix,
+    nixpkgs,
   }: let
     projectDir = self;
     project = nixpkgs.lib.importTOML "${projectDir}/pyproject.toml";
@@ -25,26 +19,14 @@
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {
         inherit system;
-
-        overlays = [
-          poetry2nix.overlay
-        ];
       };
 
-      inherit (pkgs.poetry2nix) mkPoetryApplication mkPoetryEnv;
-
       python = pkgs."python${pythonVersion}";
-
-      overrides = pkgs.poetry2nix.overrides.withDefaults (self: super: {
-        # workaround https://github.com/nix-community/poetry2nix/issues/568
-        tmuxp = super.tmuxp.overridePythonAttrs (old: {
-          buildInputs = (old.buildInputs or []) ++ [self.poetry-core];
-        });
-      });
+      poetry2nix = pkgs.poetry2nix;
     in {
       packages = {
-        ${projectName} = mkPoetryApplication {
-          inherit python projectDir overrides;
+        ${projectName} = poetry2nix.mkPoetryApplication {
+          inherit python projectDir;
 
           preferWheels = true;
         };
@@ -53,8 +35,8 @@
       };
 
       devShells = {
-        ${projectName} = mkPoetryEnv {
-          inherit python projectDir overrides;
+        ${projectName} = poetry2nix.mkPoetryEnv {
+          inherit python projectDir;
 
           preferWheels = true;
         };
