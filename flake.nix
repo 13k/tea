@@ -3,13 +3,15 @@
 
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:NixOS/nixpkgs/23.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    poetry2nix.url = "github:nix-community/poetry2nix";
   };
 
   outputs = {
     self,
     flake-utils,
     nixpkgs,
+    poetry2nix,
   }: let
     projectDir = self;
     project = nixpkgs.lib.importTOML "${projectDir}/pyproject.toml";
@@ -22,10 +24,11 @@
       };
 
       python = pkgs."python${pythonVersion}";
-      poetry2nix = pkgs.poetry2nix;
+
+      inherit (poetry2nix.lib.mkPoetry2Nix {inherit pkgs;}) mkPoetryApplication mkPoetryEnv;
     in {
       packages = {
-        ${projectName} = poetry2nix.mkPoetryApplication {
+        ${projectName} = mkPoetryApplication {
           inherit python projectDir;
 
           preferWheels = true;
@@ -35,7 +38,7 @@
       };
 
       devShells = {
-        ${projectName} = poetry2nix.mkPoetryEnv {
+        ${projectName} = mkPoetryEnv {
           inherit python projectDir;
 
           preferWheels = true;
