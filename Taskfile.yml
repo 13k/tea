@@ -1,0 +1,35 @@
+version: 3
+
+tasks:
+  default:
+    cmds:
+      - task: build
+
+  build:
+    desc: Build
+    vars:
+      RYE_DEBUG_FLAGS: '{{ empty .DEBUG | ternary "" "--verbose" }}'
+    cmds:
+      - rye build {{ .RYE_DEBUG_FLAGS }}
+
+  nix:build:
+    desc: Build nix flake
+    vars:
+      NIX_DEBUG_FLAGS: '{{ empty .DEBUG | ternary "" "-L --show-trace --print-out-paths --keep-build-log" }}'
+    cmds:
+      - nix build --no-link --allow-dirty --no-warn-dirty {{ .NIX_DEBUG_FLAGS }}
+      - nix path-info -Sh --allow-dirty --no-warn-dirty
+
+  nix:check:
+    desc: Check nix flake
+    vars:
+      NIX_DEBUG_FLAGS: '{{ empty .DEBUG | ternary "" "-L --show-trace" }}'
+    cmds:
+      - nix flake check --no-link --allow-dirty --no-warn-dirty {{ .NIX_DEBUG_FLAGS }}
+
+  nix:update:
+    desc: Update nix flake inputs
+    vars:
+      NIX_DEBUG_FLAGS: '{{ empty .DEBUG | ternary "" "-L --show-trace" }}'
+    cmds:
+      - nix flake update --no-warn-dirty {{ .NIX_DEBUG_FLAGS }}
