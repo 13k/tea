@@ -1,74 +1,63 @@
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
+[project]
 name = "tea"
 version = "0.4.5"
 description = "Manage tmuxp session configurations"
-authors = ["Kiyoshi '13k' Murata <kbmurata@proton.me>"]
+authors = [{ name = "13k", email = "tea.0f4cw@slmail.me" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+urls = { homepage = "https://github.com/13k/tea" }
+requires-python = ">= 3.12"
+classifiers = ["Private :: Do Not Upload"]
+dependencies = ["pyyaml~=6.0", "tmuxp~=1.46"]
 
-[tool.poetry.scripts]
-tea = 'tea.cli:main'
+[project.scripts]
+"tea" = "tea.cli:main"
 
-[tool.poetry.dependencies]
-python = "^3.10"
-PyYAML = "^6.0"
-tmuxp = "^1.27.0"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.dev-dependencies]
-black = "^24.3"
-mypy = "^1.0"
-ptpython = "^3.0"
-types-PyYAML = "^6.0"
+[tool.rye]
+managed = true
+dev-dependencies = ["ptpython~=3.0", "mypy~=1.10", "types-pyyaml~=6.0"]
 
-[tool.black]
-line-length = 98
-target-version = ["py310"]
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-      \.eggs
-    | \.git
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-    | tmp
-  )/
-)
-'''
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tea"]
 
 [tool.ruff]
+target-version = "py312"
 line-length = 98
+indent-width = 4
+include = ["src/**/*.py"]
 
-[tool.mypy]
-python_version = "3.10"
-pretty = true
-show_column_numbers = true
-show_error_codes = true
-show_error_context = true
-follow_imports = "normal"
-ignore_missing_imports = true
-allow_redefinition = false
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-ignore_errors = false
-implicit_reexport = false
-local_partial_types = true
-no_implicit_optional = true
-strict_equality = true
-strict_optional = true
-warn_no_return = true
-warn_redundant_casts = true
-warn_return_any = true
-warn_unreachable = true
-warn_unused_configs = true
-warn_unused_ignores = true
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.ruff.lint]
+select = [
+  # flake8-bugbear
+  "B",
+  # pycodestyle
+  "E",
+  # Pyflakes
+  "F",
+  # isort
+  "I",
+  # flake8-simplify
+  "SIM",
+  # pyupgrade
+  "UP",
+  # ruff
+  "RUF100",
+]
+
+[tool.pyright]
+stubPath = "stubs"
+typeCheckingMode = "strict"
+useLibraryCodeForTypes = true
+include = ["src/**/*.py"]
