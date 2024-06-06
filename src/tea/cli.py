@@ -6,8 +6,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, NamedTuple, NoReturn, TypeVar
+from typing import Any, NamedTuple, NoReturn, TypeVar
 
 from . import __version__
 from .path import PathLike, expand_path
@@ -49,11 +50,7 @@ def _patharg(
 ) -> OptionType[PathLike]:
     def validate_patharg(arg: str) -> PathLike:
         raw = Path(arg)
-
-        if expand:
-            path = expand_path(arg)
-        else:
-            path = raw
+        path = expand_path(arg) if expand else raw
 
         if must_exist and not path.exists():
             msg = f"Path {path} doesn't exist"
@@ -157,6 +154,9 @@ def main() -> int:  # pylint: disable=too-many-return-statements
 
     args = parser.parse_args()
 
+    if args.name is None:
+        parser.error("NAME is required")
+
     options: Options = Options(
         tmux=args.tmux,
         kill=args.kill,
@@ -183,9 +183,6 @@ def main() -> int:  # pylint: disable=too-many-return-statements
     if options.active:
         return _cmd_list_active(options)
 
-    if options.name is None:
-        parser.error("NAME is required")
-
     if options.print_dir or options.print_dir_exp:
         return _cmd_print_dir(options)
 
@@ -195,7 +192,7 @@ def main() -> int:  # pylint: disable=too-many-return-statements
     return _cmd_load_session(options)
 
 
-def _cmd_version(_options: Options) -> int:
+def _cmd_version(_: Options) -> int:
     print(__version__)
     return 0
 
@@ -204,7 +201,7 @@ def _cmd_kill_server(options: Options) -> NoReturn:
     tmux("kill-server", cmd=options.tmux)
 
 
-def _cmd_list_configs(_options: Options) -> int:
+def _cmd_list_configs(_: Options) -> int:
     for path in tmuxp_config_list():
         print(path.name[: path.name.rfind(path.suffix)])
 

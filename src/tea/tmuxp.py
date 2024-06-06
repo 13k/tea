@@ -1,6 +1,7 @@
 """
 tmuxp integration
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,8 +12,7 @@ from tmuxp.cli.load import load_workspace
 from tmuxp.workspace.finders import get_workspace_dir
 
 from .config import Config
-from .path import expand_path
-from .path import PathLike
+from .path import PathLike, expand_path
 
 CONFIG_EXT: Final = "yml"
 

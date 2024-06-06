@@ -4,15 +4,15 @@ config module
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict, Union
+from typing import Literal, TypedDict
 
-TmuxLayout = Union[
-    Literal["even-horizontal"],
-    Literal["even-vertical"],
-    Literal["main-horizontal"],
-    Literal["main-vertical"],
-    Literal["tiled"],
-]
+type TmuxLayout = (
+    Literal["even-horizontal"]
+    | Literal["even-vertical"]
+    | Literal["main-horizontal"]
+    | Literal["main-vertical"]
+    | Literal["tiled"]
+)
 
 
 class Config(TypedDict, total=False):
